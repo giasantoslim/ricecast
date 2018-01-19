@@ -21,13 +21,57 @@
     <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
 
     <!-- jQuery -->
-    <script src="vendor/jquery/jquery.min.js"></script> 
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript">
+        function getResponse(obj){
+            document.getElementById("html_climate_type").innerHTML += obj.res_climate_type[0].climate_type;
+            $(function() {
+              $('#t_latestdata').bootstrapTable({
+                data: obj.res_latest_data
+              });
+            });
+            $(function() {
+              $('#t_forecast').bootstrapTable({
+                data: obj.res_forecast_data
+              });
+            });
+            document.getElementById("html_recom").innerHTML += obj.res_recom[0].recom;
+        }
+        $(document).ready(function submitForm() {
+          $('#submit').click(function(event) {   
+            var x = document.getElementById("province_hidden").value;
+            document.getElementById("html_province").innerHTML = x;
+            /* alert("Hello world");    
+            return false; */     
+            $.ajax({
+              url: '/forecast', //server url
+              type: 'POST',    //passing data as post method
+              dataType: 'json', // returning data as json
+              data: { //form values
+                province: $('#province_id').val(),
+                latest_yr: $('#sel_yr').val(),
+                latest_q: $('#sel_q').val(),
+                latest_yr: $('#sel_qno').val(),
+                latest_q: $('#sel_rice_eco').val()
+                },                
+              success:function(response)
+              {
+                console.log(response);     
+                var obj = JSON.parse(response);
+                var prov = 
+                getResponse(obj);
+              }            
+            });            
+          });
+        });
+    </script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
 
     <!-- Plugin CSS -->
     <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+    <link href="css/bootstrap-table.min.css" rel="stylesheet">
 
     <!-- Theme CSS -->
     <link href="css/creative.css" rel="stylesheet">
@@ -39,6 +83,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
     <script src="vendor/scrollreveal/scrollreveal.min.js"></script>
     <script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
+    <script src="js/bootstrap-table.min.js"></script>
 
 </head>
 <body>
@@ -50,7 +95,7 @@
                     <span class="sr-only">Toggle navigation</span> Menu <i class="fa fa-bars"></i>
                 </button>                
                 <div id="logo_container">
-                    <a href="index.html"><img src="http://www.ricecast.com/images/logo2.png" alt="ricecast logo" id="logo" width="121" height="50" class="logo-size"/></a>
+                    <a href="index.html"><img src="img/logo2.png" alt="ricecast logo" id="logo" width="121" height="50" class="logo-size"/></a>
                 </div>                
             </div>
 
@@ -180,113 +225,121 @@
             </div>
             <!-- Connect form to database via ajax -->
             <div class="after-svg col-xs-12 col-sm-6 col-lg-8">
-                <form action="" method="POST" role="form">
+                <form action="/forecast" method="POST" role="form" id=form_forecast enctype="multipart/form-data">
                     <!-- Get province name from clicked area in SVG, submit to database-->
-                    <h3 id="province" class="bold-text green-text">Province</h3><br>
+                    <p id="html_province" class="bold-text green-text h3"></p>
+                    <input type="hidden" name="province" id="province_id">
+                    <input type="hidden" name="prov" id="province_hidden">
                     <script>
-                         $(document).ready(function () {
+                        /*function getProvince(province, provId) {
+                            document.getElementById("html_province").innerHTML = province;     
+                            document.getElementById("province_id").value = provId;
+                        }
+                        $(document).ready(function () {
                             $('path').click(function () {
-                                /*alert($(this).attr('title'));*/
-                                var location = $(this).attr('title');
-                                /*alert('province: '+location);*/
-                                document.getElementbyId("province").innerHTML = location;
+                                var map_province = $(this).attr('title');
+                                var map_provId = $(this).attr('id');
+                                getProvince(map_province, map_provId);
+                            });                            
+                        });*/
+                        function getClimateType(obj){
+                            document.getElementById("html_climate_type").innerHTML += obj.climate_type;
+                        }
+                        function getProvince(province, provId) {
+                            document.getElementById("html_province").innerHTML = province;
+                            document.getElementById("province_hidden").value = province;
+                            document.getElementById("province_id").value = provId;
+                        }
+                        $(document).ready(function () {
+                            $('path').click(function () {
+                                var map_province = $(this).attr('title');
+                                var map_provId = $(this).attr('id');
+                                getProvince(map_province, map_provId);
                             });
-                        });                          
+                            $('path').click(function(event) {
+                                $.ajax({
+                                    url: '/climate_type',
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    data: {
+                                        province: $('#province_id').val()
+                                    },
+                                    success:function(response)
+                                    {
+                                        console.log(response);
+                                        var obj = JSON.parse(response);
+                                        getClimateType(obj);
+                                    }
+                                });
+                            });
+                        }); 
                     </script>
-                    <div class="form-group" id="">                        
-                            <!-- Get climate type of province via ajax -->
-                            <label for="">Climate Type</label>
-                            <input type="text" class="form-control margin-b7" id="" aria-describedby="help" placeholder="Climate type will be displayed here" disabled>
-                            <a href="#climatetypes" class="page-scroll btn btn-green sr-button pull-right">Learn more about climate types</a><br>
-                    </div>                
-                    <label for="" class"">Latest Data</label>
-                    <table id="t_latestdata" class="table-sm table-responsive table-bordered">
-                        <thead>
-                            <tr>
-                                <th data-field="" rowspan="2" id="tr_yr">Year</th>
-                                <th data-field="" colspan="2" id="tr_q1">Q1</th>
-                                <th data-field="" colspan="2" id="tr_q2">Q2</th>
-                                <th data-field="" colspan="2" id="tr_q3">Q3</th>
-                                <th data-field="" colspan="2" id="tr_q4">Q4</th>  
-                            </tr>
-                            <tr>
-                                <th data-field="">Rice Yields</th>
-                                <th data-field="">Rainfall Amount</th>
-                                <th data-field="" id="tr_q2">Rice Yields</th>
-                                <th data-field="" id="tr_q2">Rainfall Amount</th>
-                                <th data-field="">Rice Yields</th>
-                                <th data-field="">Rainfall Amount</th>
-                                <th data-field="" id="tr_q4">Rice Yields</th>
-                                <th data-field="" id="tr_q4">Rainfall Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>                        
-                        </tbody>
-                    </table><br>
                     <div class="form-group" id="">
                             <!-- Get climate type of province via ajax -->
-                            <label for="">Current year</label>
-                            <input type="text" class="form-control" id="" placeholder="Enter desired latest year for training data">
+                            <label for="">Climate Type</label>
+                            <p id=html_climate_type></p>
+                            <a href="#climatetypes" class="page-scroll btn btn-green sr-button">Learn more about climate types</a><br>
+                    </div> 
+                    <div class="form-group" id="">
+                            <!-- Get climate type of province via ajax -->
+                            <label for="">Latest year
+                                <select class="form-control" id="sel_yr" aria-describedby="help" name="latest_yr">
+                                    <option>1971</option>
+                                    <option>1972</option>
+                                    <option>1973</option>
+                                    <option>1974</option>
+                                    <option>1975</option>
+                                    <option>1976</option>
+                                    <option>1977</option>
+                                    <option>1978</option>
+                                    <option>1979</option>
+                                    <option>1980</option>
+                                    <option>1981</option>
+                                    <option>1982</option>
+                                    <option>1983</option>
+                                    <option>1984</option>
+                                    <option>1985</option>
+                                    <option>1986</option>
+                                    <option>1987</option>
+                                    <option>1988</option>
+                                    <option>1989</option>
+                                    <option>1990</option>
+                                    <option>1991</option>
+                                    <option>1992</option>
+                                    <option>1993</option>
+                                    <option>1994</option>
+                                    <option>1995</option>
+                                    <option>1996</option>
+                                    <option>1997</option>
+                                    <option>1998</option>
+                                    <option>1999</option>
+                                    <option>2000</option>
+                                    <option>2001</option>
+                                    <option>2002</option>
+                                    <option>2003</option>
+                                    <option>2004</option>
+                                    <option>2005</option>
+                                    <option>2006</option>
+                                    <option>2007</option>
+                                    <option>2008</option>
+                                    <option>2009</option>
+                                    <option>2010</option>
+                                    <option>2011</option>
+                                    <option>2012</option>
+                                    <option>2013</option>
+                                    <option>2014</option>
+                                    <option>2015</option>
+                                    <option>2016</option>
+                                    <option>2017</option>
+                                    <option>2018</option>      
+                                </select>
+                            </label><br>
+                            <small id="help" class="form-text text-muted">Select desired latest year for training data</small><br>
                     </div>
                     <div class="form-group" id="">
                             <!-- Get climate type of province via ajax -->
-                            <label for="">Current Q
-                                <select class="form-control" id="sel_q" aria-describedby="help">
+                            <label for="">Latest Q
+                                <select class="form-control" id="sel_q" aria-describedby="help" name="latest_q">
                                     <option>1</option>
                                     <option>2</option>
                                     <option>3</option>
@@ -296,62 +349,66 @@
                             <small id="help" class="form-text text-muted">Select desired latest quarter for training data</small><br>
                     </div>                    
                     <div class="form-group" id="text_qtrno">
-                        <form action="" method="POST" role="form">
                             <!-- Get no of q via ajax -->
                             <label for="sel_q" class"">How many Q to forecast?
-                                <select class="form-control" id="sel_q">
+                                <select class="form-control" id="sel_qno" name="q_no">
                                     <option>1</option>
                                     <option>2</option>
                                     <option>3</option>
                                     <option>4</option>
                                 </select>
                             </label>
-                        </form>
                     </div>
                     <div class="form-group" id="">
                             <!-- Get rice ecosystem via ajax -->
                             <label for="">Rice ecosystem
-                                <select class="form-control" id="sel_q" aria-describedby="help">
+                                <select class="form-control" id="sel_rice_eco" aria-describedby="help" name="rice_eco">
                                     <option>Irrigated</option>
                                     <option>Rainfed lowland</option>
                                     <option>Upland</option>
                                 </select>
                             </label><br>
                     </div>
+
+                    <a href="" id="submit" class="btn btn-green sr-button btn-xl">Submit</a><br><br>
+
+                    <span id="result"></span>
+
+                    <label for="" class"">Latest Data</label>
+                    <table id="t_latestdata" class="table-sm table-responsive table-bordered">
+                        <thead>
+                            <tr>
+                                <th data-field="yr" rowspan="2" id="tr_yr">Year</th>
+                                <th data-field="" colspan="2" id="tr_q1">Q1</th>
+                                <th data-field="" colspan="2" id="tr_q2">Q2</th>
+                                <th data-field="" colspan="2" id="tr_q3">Q3</th>
+                                <th data-field="" colspan="2" id="tr_q4">Q4</th>  
+                            </tr>
+                            <tr>
+                                <th data-field="q1_rice">Rice Yields</th>
+                                <th data-field="q1_rain">Rainfall Amount</th>
+                                <th data-field="q2_rice" id="tr_q2">Rice Yields</th>
+                                <th data-field="q2_rain" id="tr_q2">Rainfall Amount</th>
+                                <th data-field="q3_rice">Rice Yields</th>
+                                <th data-field="q3_rain">Rainfall Amount</th>
+                                <th data-field="q4_rice" id="tr_q4">Rice Yields</th>
+                                <th data-field="q4_rain" id="tr_q4">Rainfall Amount</th>
+                            </tr>
+                        </thead>
+                    </table><br>
+                    <label for="" class"">Forecast Data</label>
                     <table id="t_forecast" class="table-sm table-responsive table-bordered">
                         <thead>
                             <tr>
-                                <th data-field="" id="">Quarter</th>
-                                <th data-field="" id="">Forecast</th>
-                                <th data-field="" id="">Previous</th>
+                                <th data-field="qtr" id="">Quarter</th>
+                                <th data-field="forecast" id="">Forecast</th>
+                                <th data-field="prev" id="">Previous</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>
-                            <tr>
-                                <td>#</td>
-                                <td>#</td>
-                                <td>#</td>
-                            </tr>                                          
-                        </tbody>
                     </table><br>
                     <div class="form-group">
                         <label for="comment">Recommendation:</label>
-                        <textarea class="form-control" rows="5" id="" disabled></textarea>
+                        <p id="html_recom"></p>
                     </div>
                 </form>
             </div> <!-- End of Form -->
@@ -385,7 +442,7 @@
                     <div class="service-box">
                         <img src="img/climate-type-3.png" class="fit-icon-height2" alt="psa">
                         <h3>Climate Type 3</h3>
-                        <p class="text-muted">No very pronounced maximum rain period with a dry season lasting only from one to three months, either during the period from December to February or from March to May. This type resemble type 1 since it has a short dry season.</p>
+                        <p class="text-muted">No very pronounced maximum rain period with a dry season lasting only from one to three months, either during the period from December to February or from March to May. This type resembles type 1 since it has a short dry season.</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 text-center">

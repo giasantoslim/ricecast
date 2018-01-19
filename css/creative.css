@@ -995,9 +995,9 @@ tbody > tr > td {
   min-width: 100%
 }
 .btn-green {
-  color: white;
-  background-color: #00b050;
-  border-color: #00b050;
+  color: #00b050;
+  background-color: #ffffff;
+  border: 2px solid rgb(0, 176, 80);
   -webkit-transition: all 0.35s;
   -moz-transition: all 0.35s;
   transition: all 0.35s;
@@ -1008,9 +1008,9 @@ tbody > tr > td {
 .btn-green:active,
 .btn-green.active,
 .open > .dropdown-toggle.btn-green {
-  color: #00b050;
-  background-color: #474747;
-  border-color: #474747;
+  border: 2px solid rgb(0, 176, 80);
+  color: #ffffff;
+  background-color: #00b050;
 }
 .btn-green:active,
 .btn-green.active,
@@ -1035,6 +1035,7 @@ fieldset[disabled] .btn-green:active,
 .btn-green.disabled.active,
 .btn-green[disabled].active,
 fieldset[disabled] .btn-green.active {
-  color: white;
+  border: 2px solid rgb(0, 176, 80);
+  color: #ffffff;
   background-color: #00b050;
-  border-color: #00b050;
+}
